@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # """
 # sidebar_handler.py
 # Created on Dec 17, 2024
@@ -7,7 +6,7 @@
 
 import os
 import tempfile
-from typing import Iterable, List, Optional, Tuple
+from collections.abc import Iterable
 from urllib.parse import ParseResult, urlparse
 
 import lancedb
@@ -16,14 +15,14 @@ import streamlit as st
 from docling_core.types.doc.document import DoclingDocument
 from lancedb.table import Table
 from streamlit.runtime.uploaded_file_manager import UploadedFile
-from utils.st_utils import clean_table_name, init_db, load_chat_history
 
 from configs import cfgs
 from src.app.embedding import create_embeddings
 from src.app.extraction import extract_from_sitemap, extract_html, extract_pdf
+from utils.st_utils import clean_table_name, init_db, load_chat_history
 
 
-def handle_existing_database() -> Optional[Table]:
+def handle_existing_database() -> Table | None:
     """Handle the 'Use Existing Database' option in sidebar."""
     # Get the database path
     db_path: str = os.path.abspath(
@@ -51,7 +50,7 @@ def handle_existing_database() -> Optional[Table]:
     return None
 
 
-def handle_pdf_upload() -> Optional[Table]:
+def handle_pdf_upload() -> Table | None:
     """Handle the 'Upload PDF' option in sidebar."""
     uploaded_file: UploadedFile | None = st.sidebar.file_uploader(label="Upload PDF", type="pdf")
     if not uploaded_file:
@@ -85,7 +84,7 @@ def handle_pdf_upload() -> Optional[Table]:
         return table
 
 
-def handle_url_input() -> Optional[Table]:
+def handle_url_input() -> Table | None:
     """Handle the 'Enter URL' option in sidebar."""
     url: str = st.sidebar.text_input(label="Enter URL (e.g., https://www.ribalta.pt)")
 
@@ -107,7 +106,10 @@ def handle_url_input() -> Optional[Table]:
         )  # Use HEAD request to check existence
         if response.status_code >= 400:
             st.sidebar.error(
-                body=f"URL is not accessible (Status Code: {response.status_code}). Please check the link."
+                body=(
+                    f"URL is not accessible (Status Code: {response.status_code}). "
+                    "Please check the link."
+                )
             )
             return None
     except requests.RequestException:
@@ -147,7 +149,7 @@ def handle_url_input() -> Optional[Table]:
         return table
 
 
-def handle_website_extraction() -> Optional[Table]:
+def handle_website_extraction() -> Table | None:
     """Handle the 'Extract Website' option in sidebar."""
     base_url: str = st.sidebar.text_input(
         label="Enter Website Base URL (e.g., https://www.ribalta.pt)"
@@ -173,7 +175,10 @@ def handle_website_extraction() -> Optional[Table]:
         response: requests.Response = requests.head(sitemap_url, timeout=5)
         if response.status_code != 200:
             st.sidebar.error(
-                body=f"No sitemap found at {sitemap_url}. Please check the URL or enter the correct sitemap filename."
+                body=(
+                    f"No sitemap found at {sitemap_url}. "
+                    "Please check the URL or enter the correct sitemap filename."
+                )
             )
             return None
     except requests.RequestException:
@@ -183,7 +188,7 @@ def handle_website_extraction() -> Optional[Table]:
     with st.spinner(text="Processing Website..."):
         domain: str = parsed_url.netloc
         if domain.startswith("www."):
-            domain: str = domain[4:]
+            domain = domain[4:]
 
         for tld in cfgs["COMMON_TLDS"]:
             if domain.endswith(tld):
@@ -191,7 +196,7 @@ def handle_website_extraction() -> Optional[Table]:
                 break
 
         table_name: str = f"site_{clean_table_name(name=domain)}"
-        docs: List[DoclingDocument] = extract_from_sitemap(
+        docs: list[DoclingDocument] = extract_from_sitemap(
             base_url=base_url, sitemap_filename=sitemap_filename
         )
         combined_content: str = "\n\n".join([doc.export_to_markdown() for doc in docs])
@@ -214,7 +219,7 @@ def handle_website_extraction() -> Optional[Table]:
         return table
 
 
-def handle_sidebar() -> Optional[Table]:
+def handle_sidebar() -> Table | None:
     """Main function to handle all sidebar interactions."""
     st.sidebar.header(body="Document Input")
 
@@ -238,9 +243,9 @@ def handle_sidebar() -> Optional[Table]:
         st.session_state.table = None
         st.rerun()  # Ensure Streamlit updates the UI
 
-    table = None
+    table: Table | None = None
     if input_type == "Use Existing Database":
-        table: Table | None = handle_existing_database()
+        table = handle_existing_database()
     elif input_type == "Upload PDF":
         table = handle_pdf_upload()
     elif input_type == "Enter URL":

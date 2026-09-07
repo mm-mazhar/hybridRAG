@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional, Self
+from typing import Self
 
 from tiktoken import Encoding, get_encoding
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
@@ -20,12 +20,12 @@ class OpenAITokenizerWrapper(PreTrainedTokenizerBase):
         self._vocab_size: int = self.tokenizer.max_token_value
 
     def tokenize(
-        self, text: str, pair: Optional[str] = None, add_special_tokens: bool = True, **kwargs
-    ) -> List[str]:
+        self, text: str, pair: str | None = None, add_special_tokens: bool = True, **kwargs
+    ) -> list[str]:
         """Main method used by HybridChunker."""
         return [str(object=t) for t in self.tokenizer.encode(text=text)]
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         return self.tokenize(text=text)
 
     def _convert_token_to_id(self, token: str) -> int:
@@ -34,7 +34,7 @@ class OpenAITokenizerWrapper(PreTrainedTokenizerBase):
     def _convert_id_to_token(self, index: int) -> str:
         return str(object=index)
 
-    def get_vocab(self) -> Dict[str, int]:
+    def get_vocab(self) -> dict[str, int]:
         return {str(object=k): v for k, v in enumerate(iterable=range(self.vocab_size))}
 
     @property
@@ -43,9 +43,9 @@ class OpenAITokenizerWrapper(PreTrainedTokenizerBase):
 
     def save_vocabulary(
         self,
-        save_directory: Optional[str] = None,
-        filename_prefix: Optional[str] = None,
-    ) -> Tuple[str]:
+        save_directory: str | None = None,
+        filename_prefix: str | None = None,
+    ) -> tuple[str]:
         return (save_directory or "",)
 
     @classmethod

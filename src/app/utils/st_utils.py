@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # """
 # st_utils.py
 # Created on Dec 17, 2024
@@ -7,13 +6,13 @@
 
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 import lancedb
 import numpy as np
 import streamlit as st
 from lancedb.table import Table
-from openai import OpenAI, Stream
+from openai import Stream
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
 
@@ -57,7 +56,7 @@ def get_context(query: str, table, num_results: int = 3) -> str:
         title: Any = row["metadata"]["title"]
 
         # Build source citation
-        source_parts: List[Any] = []
+        source_parts: list[Any] = []
         if filename:
             source_parts.append(filename)
         # Check if page_numbers exists and is not empty
@@ -77,7 +76,7 @@ def get_context(query: str, table, num_results: int = 3) -> str:
 def get_chat_response(
     client,
     model_name: str,
-    messages: List[Dict[str, str]],
+    messages: list[dict[str, str]],
     temperature: float,
     context: str,
 ) -> str:
@@ -90,7 +89,7 @@ def get_chat_response(
     Returns:
         str: Model's response
     """
-    system_prompt: str = f"""You are a helpful assistant that answers questions based on the provided context.
+    system_prompt: str = f"""You are a helpful assistant that answers questions from given context.
     Use only the information from the context to answer questions. If you're unsure or the context
     doesn't contain the relevant information, say so.
     
@@ -98,7 +97,7 @@ def get_chat_response(
     {context}
     """
 
-    messages_with_context: List[Any] = [
+    messages_with_context: list[Any] = [
         {"role": "system", "content": system_prompt},
         *messages,
     ]
@@ -117,7 +116,7 @@ def get_chat_response(
 
 
 # Load chat history
-def load_chat_history(file_name: str = "") -> List[Dict[str, str]]:
+def load_chat_history(file_name: str = "") -> list[dict[str, str]]:
     """Load chat history for specific table.
 
     Args:
@@ -140,7 +139,7 @@ def load_chat_history(file_name: str = "") -> List[Dict[str, str]]:
         open(history_file, "w").close()  # 'w' mode creates the file if it's missing
 
     try:
-        with open(file=history_file, mode="r") as f:
+        with open(file=history_file) as f:
             return json.load(fp=f)
     except json.JSONDecodeError:
         # Handle case where the file is empty or contains invalid JSON
@@ -148,13 +147,16 @@ def load_chat_history(file_name: str = "") -> List[Dict[str, str]]:
 
 
 # Save chat history
-def save_chat_history(file_name: str = "", messages: List[Dict[str, str]] = []) -> None:
+def save_chat_history(file_name: str = "", messages: list[dict[str, str]] | None = None) -> None:
     """Save chat history for specific table.
 
     Args:
         file_name: Name of the file to save history for
         messages: Chat messages to save
     """
+    if messages is None:
+        messages = []
+
     # Create chat histories directory if it doesn't exist
     history_dir: str = os.path.join(os.path.dirname(p=__file__), "../../../", "chat_histories")
     os.makedirs(name=history_dir, exist_ok=True)
@@ -180,6 +182,6 @@ def clean_table_name(name: str) -> str:
     # Remove special characters and spaces, replace with underscore
     cleaned: str = "".join(c if c.isalnum() else "_" for c in name)
     # Remove multiple consecutive underscores
-    cleaned: str = "_".join(filter(None, cleaned.split(sep="_")))
+    cleaned = "_".join(filter(None, cleaned.split(sep="_")))
     # Convert to lowercase
     return cleaned.lower()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # """
 # 2_chunking.py
 # Created on Dec 17, 2024
@@ -12,14 +11,13 @@ import sys
 # Add the project root directory to Python path
 sys.path.append(os.path.abspath(path=os.path.join(os.path.dirname(p=__file__), "../..")))
 
-from typing import Iterator, List
+from collections.abc import Iterator
 
 from docling.datamodel.document import ConversionResult
 from docling.document_converter import DocumentConverter
 from docling_core.transforms.chunker.base import BaseChunk
 from docling_core.transforms.chunker.hybrid_chunker import HybridChunker
 from dotenv import load_dotenv
-from openai import OpenAI
 from utils.tokenizer import OpenAITokenizerWrapper
 
 from configs import cfgs
@@ -45,7 +43,7 @@ def initialize_chunker(max_tokens: int) -> HybridChunker:
     )
 
 
-def chunk_document(source_path: str, max_tokens: int) -> List[BaseChunk]:
+def chunk_document(source_path: str, max_tokens: int) -> list[BaseChunk]:
     """
     Convert document and split it into chunks.
 
@@ -68,7 +66,7 @@ def chunk_document(source_path: str, max_tokens: int) -> List[BaseChunk]:
 
 def main() -> None:
     """Main function to demonstrate usage."""
-    chunks: List[BaseChunk] = chunk_document(
+    chunks: list[BaseChunk] = chunk_document(
         source_path=cfgs["PDF_PATH"], max_tokens=cfgs["MAX_TOKENS"]
     )
     print(f"Created {len(chunks)} chunks")

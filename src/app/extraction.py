@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # """
 # 1_Extraction.py
 # Created on Dec 17, 2024
@@ -10,11 +9,10 @@ import os
 import sys
 
 # Add the project root directory to Python path
-sys.path.append(
-    os.path.abspath(path=os.path.join(os.path.dirname(p=__file__), "../.."))
-)
+sys.path.append(os.path.abspath(path=os.path.join(os.path.dirname(p=__file__), "../..")))
 
-from typing import Any, Dict, Iterator, List
+from collections.abc import Iterator
+from typing import Any
 
 from docling.datamodel.document import ConversionResult
 from docling.document_converter import DocumentConverter
@@ -24,7 +22,7 @@ from utils.sitemap import get_sitemap_urls
 from configs import cfgs
 
 
-def extract_pdf(pdf_path: str) -> tuple[str, Dict[Any, Any]]:
+def extract_pdf(pdf_path: str) -> tuple[str, dict[Any, Any]]:
     """
     Extract content from a PDF file.
 
@@ -58,7 +56,7 @@ def extract_html(html_path: str) -> str:
 
 def extract_from_sitemap(
     base_url: str, sitemap_filename: str = "sitemap.xml"
-) -> List[DoclingDocument]:
+) -> list[DoclingDocument]:
     """
     Extract content from multiple pages using a sitemap.
 
@@ -70,14 +68,10 @@ def extract_from_sitemap(
         List[DoclingDocument]: List of extracted documents
     """
     converter = DocumentConverter()
-    sitemap_urls: List[str] = get_sitemap_urls(
-        base_url=base_url, sitemap_filename=sitemap_filename
-    )
-    conv_results_iter: Iterator[ConversionResult] = converter.convert_all(
-        source=sitemap_urls
-    )
+    sitemap_urls: list[str] = get_sitemap_urls(base_url=base_url, sitemap_filename=sitemap_filename)
+    conv_results_iter: Iterator[ConversionResult] = converter.convert_all(source=sitemap_urls)
 
-    docs: List[DoclingDocument] = []
+    docs: list[DoclingDocument] = []
     for result in conv_results_iter:
         if result.document:
             docs.append(result.document)

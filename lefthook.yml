@@ -1,0 +1,28 @@
+post-checkout:
+  jobs:
+    - name: branch-name
+      script: branch-name.sh
+      runner: bash
+
+pre-commit:
+  jobs:
+    - run: uv run ruff check --fix {staged_files}
+      glob: "*.py"
+      stage_fixed: true
+    - run: uv run ruff format {staged_files}
+      glob: "*.py"
+      stage_fixed: true
+    - name: typecheck
+      run: uv run mypy
+      glob: "**/*.py"
+
+commit-msg:
+  jobs:
+    - script: conventional.sh
+      runner: bash
+
+# Re-enable when the app has a real test suite. Local uv env is also broken
+# (UV_PROJECT_ENVIRONMENT points at a non-venv path), so this blocks setup pushes.
+# pre-push:
+#   jobs:
+#     - run: uv run pytest -q

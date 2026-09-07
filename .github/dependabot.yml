@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # Dependabot supports uv via the pip ecosystem (reads uv.lock / pyproject.toml).
+  # If your GitHub plan doesn't pick up uv.lock, switch this repo to Renovate with
+  # the uv manager instead — do not silently drop dependency updates.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(ci)"

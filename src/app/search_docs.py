@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # """
 # 4_search.py
 # Created on Dec 17, 2024
