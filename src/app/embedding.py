@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # """
 # 3_embedding.py
 # Created on Dec 17, 2024
@@ -11,7 +10,8 @@ import sys
 # Add the project root directory to Python path
 sys.path.append(os.path.abspath(path=os.path.join(os.path.dirname(p=__file__), "../..")))
 
-from typing import Any, Dict, Iterator, List
+from collections.abc import Iterator
+from typing import Any
 
 import lancedb
 from docling.datamodel.document import ConversionResult
@@ -22,7 +22,6 @@ from dotenv import load_dotenv
 from lancedb.embeddings import get_registry
 from lancedb.pydantic import LanceModel, Vector
 from lancedb.table import Table
-from openai import OpenAI
 from utils.tokenizer import OpenAITokenizerWrapper
 
 from configs import cfgs
@@ -37,11 +36,11 @@ class ChunkMetadata(LanceModel):
     """
 
     filename: str | None
-    page_numbers: List[int] | None
+    page_numbers: list[int] | None
     title: str | None
 
 
-def get_chunks(max_tokens: int, source_path: str) -> List[BaseChunk]:
+def get_chunks(max_tokens: int, source_path: str) -> list[BaseChunk]:
     """
     Extract and chunk the document.
 
@@ -118,7 +117,7 @@ def create_table(
     )
 
 
-def process_chunks(chunks: List[BaseChunk]) -> List[Dict[str, Any]]:
+def process_chunks(chunks: list[BaseChunk]) -> list[dict[str, Any]]:
     """
     Process chunks into the format required for the database.
 
@@ -176,7 +175,7 @@ def create_embeddings(
         Table: Created and populated LanceDB table
     """
     # Get document chunks
-    chunks: List[BaseChunk] = get_chunks(max_tokens=max_tokens, source_path=source_path)
+    chunks: list[BaseChunk] = get_chunks(max_tokens=max_tokens, source_path=source_path)
 
     # Initialize database
     db: lancedb.DBConnection = initialize_database(db_path=db_path)
@@ -191,7 +190,7 @@ def create_embeddings(
     )
 
     # Process and add chunks
-    processed_chunks: List[Dict[str, Any]] = process_chunks(chunks=chunks)
+    processed_chunks: list[dict[str, Any]] = process_chunks(chunks=chunks)
     table.add(data=processed_chunks)
 
     return table

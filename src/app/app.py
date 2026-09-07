@@ -1,23 +1,16 @@
-# -*- coding: utf-8 -*-
 # """
 # app.py
 # Created on Dec 17, 2024
 # @ Author: Mazhar
 # ""
 
-import json
 import logging
 import os
 import sys
 
-from click import UsageError
-
 # Add project root directory to Python path
-sys.path.append(
-    os.path.abspath(path=os.path.join(os.path.dirname(p=__file__), "../../"))
-)
+sys.path.append(os.path.abspath(path=os.path.join(os.path.dirname(p=__file__), "../../")))
 import warnings
-from typing import Dict
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -34,9 +27,7 @@ from utils.st_utils import (
 from configs import cfgs
 
 # Configure logging to ignore specific warnings
-logging.getLogger(name="streamlit.watcher.local_sources_watcher").setLevel(
-    level=logging.ERROR
-)
+logging.getLogger(name="streamlit.watcher.local_sources_watcher").setLevel(level=logging.ERROR)
 warnings.filterwarnings(
     action="ignore",
     category=UserWarning,
@@ -158,10 +149,8 @@ def display_search_results(context: str) -> None:
     for chunk in context.split(sep="\n\n"):
         parts: list[str] = chunk.split(sep="\n")
         text: str = parts[0]
-        metadata: Dict[str, str] = {
-            line.split(sep=": ")[0]: line.split(sep=": ")[1]
-            for line in parts[1:]
-            if ": " in line
+        metadata: dict[str, str] = {
+            line.split(sep=": ")[0]: line.split(sep=": ")[1] for line in parts[1:] if ": " in line
         }
 
         source: str = metadata.get("Source", "Unknown source")

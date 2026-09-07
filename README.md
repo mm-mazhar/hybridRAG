@@ -91,17 +91,24 @@ Streamlit-based application that enables you to ask questions about documents an
     git clone [your_repository_url]
     cd [directory]
     ```
-2. Create and activate a virtual environment:
+2. Install dependencies and local git hooks (uv):
+    ```bash
+    uv sync
+    uv run lefthook install
+    ```
+    Or run `make setup`. After a fresh clone, always run both commands so lefthook
+    hooks are installed into `.git/hooks`.
+3. Create and activate a virtual environment (if not using `uv run`):
     ```bash
     python -m venv .venv
     source .venv/bin/activate  # On Linux/macOS
     .venv\Scripts\activate  # On Windows
     ```
-3. Install dependencies:
+4. Install dependencies (pip alternative):
     ```bash
     pip install -r requirements.txt
     ```
-4. Configure Environment Variables:
+5. Configure Environment Variables:
     - Create a .env file in the root directory of the project.
     - Add your OpenAI API key:
     ```
@@ -116,6 +123,39 @@ Streamlit-based application that enables you to ask questions about documents an
     streamlit run src/app/app.py
     ```
 2. Access the application in your web browser at http://localhost:8501.
+
+## Git workflow
+
+Branch names and commit messages follow conventional commits. See
+[`.agents/rules/git.md`](.agents/rules/git.md). Hooks are enforced by
+`lefthook.yml` (`post-checkout`, `pre-commit`, `commit-msg`, `pre-push`).
+On Windows, the branch-name and commit-msg checks live in `.lefthook/` so Git
+Bash does not break on inline multiline scripts.
+
+Before opening a PR, run:
+
+```bash
+uv run ruff check .
+uv run mypy
+uv run pytest
+```
+
+## Branch protection (GitHub settings)
+
+Enable branch protection on `main` (repository Settings → Branches). This is a
+GitHub settings task, not a file in the repo:
+
+- Require a pull request before merging
+- Require the `Lint`, `Types`, and `Tests` status checks to pass
+- Dismiss stale pull request approvals when new commits are pushed
+- Do not allow force pushes
+
+## Release notes
+
+When a version tag (`v*`) is pushed, `.github/workflows/release.yml` builds and
+publishes to PyPI via Trusted Publishing. The GitHub `pypi` environment must
+exist and be configured for OIDC. Update `CHANGELOG.md` using
+[Keep a Changelog](https://keepachangelog.com) when tagging a release.
 
 
 

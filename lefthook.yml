@@ -1,0 +1,27 @@
+post-checkout:
+  jobs:
+    - name: branch-name
+      script: branch-name.sh
+      runner: bash
+
+pre-commit:
+  jobs:
+    - run: uv run ruff check --fix {staged_files}
+      glob: "*.py"
+      stage_fixed: true
+    - run: uv run ruff format {staged_files}
+      glob: "*.py"
+      stage_fixed: true
+    - name: typecheck
+      run: uv run mypy
+      glob: "**/*.py"
+
+commit-msg:
+  jobs:
+    - script: conventional.sh
+      runner: bash
+
+# Optional but recommended: run tests before pushing instead of on every commit.
+pre-push:
+  jobs:
+    - run: uv run pytest -q

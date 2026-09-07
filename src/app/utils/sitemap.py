@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # """
 # sitemap.py
 # Created on Dec 17, 2024
@@ -6,13 +5,13 @@
 # """
 
 import xml.etree.ElementTree as ET
-from typing import List, Literal
+from typing import Literal
 from urllib.parse import urljoin
 
 import requests
 
 
-def get_sitemap_urls(base_url: str, sitemap_filename: str = "sitemap.xml") -> List[str]:
+def get_sitemap_urls(base_url: str, sitemap_filename: str = "sitemap.xml") -> list[str]:
     """Fetches and parses a sitemap XML file to extract URLs.
 
     Args:
@@ -52,7 +51,7 @@ def get_sitemap_urls(base_url: str, sitemap_filename: str = "sitemap.xml") -> Li
 
         # Extract URLs using namespace if present
         if namespaces:
-            urls: List[str | None] = [
+            urls: list[str | None] = [
                 elem.text for elem in root.findall(path=".//ns:loc", namespaces=namespaces)
             ]
         else:
@@ -62,11 +61,11 @@ def get_sitemap_urls(base_url: str, sitemap_filename: str = "sitemap.xml") -> Li
         return [url for url in urls if url is not None]
 
     except requests.RequestException as e:
-        raise ValueError(f"Failed to fetch sitemap: {str(object=e)}")
+        raise ValueError(f"Failed to fetch sitemap: {str(object=e)}") from e
     except ET.ParseError as e:
-        raise ValueError(f"Failed to parse sitemap XML: {str(object=e)}")
+        raise ValueError(f"Failed to parse sitemap XML: {str(object=e)}") from e
     except Exception as e:
-        raise ValueError(f"Unexpected error processing sitemap: {str(object=e)}")
+        raise ValueError(f"Unexpected error processing sitemap: {str(object=e)}") from e
 
 
 # if __name__ == "__main__":
