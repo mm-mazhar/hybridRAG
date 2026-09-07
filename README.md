@@ -140,15 +140,19 @@ uv run mypy
 uv run pytest
 ```
 
-## Branch protection (GitHub settings)
+## Branch protection (GitHub rulesets)
 
-Enable branch protection on `main` (repository Settings → Branches). This is a
-GitHub settings task, not a file in the repo:
+`main` is protected by the ChatbotX-style **`protect_main` repository ruleset**
+(Settings → Rules), not classic branch protection:
 
-- Require a pull request before merging
-- Require the `Lint`, `Types`, and `Tests` status checks to pass
-- Dismiss stale pull request approvals when new commits are pushed
-- Do not allow force pushes
+- No direct pushes — `main` only advances through pull requests
+- Squash merge only
+- `main` cannot be deleted or force-pushed
+- Required status checks: `Lint`, `Types`, `Tests`
+- Zero required approvals (maintainer can merge their own PR)
+
+A second ruleset, **Copilot review for default branch**, requests Copilot
+review on non-draft PRs. CI also re-runs on every push to `main` after merge.
 
 ## Release notes
 
