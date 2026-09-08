@@ -151,14 +151,14 @@ document_pipeline_tree.txt
 docs/Prompts/test.txt
 
 # Ruff Cache
-.ruff_cache/*
+.ruff_cache/
 
 # Git/GitHub Cache
 .git/*
 .git
 
 # Pytest Cache
-.pytest_cache/*
+.pytest_cache/
 
 # Notebooks Folder
 mlruns/*
