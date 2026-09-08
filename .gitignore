@@ -131,7 +131,9 @@ dmypy.json
 # Tests
 tests/test_data/
 tests/__pycache__/
+tests/test_add.py
 src/app/utils/add.py
+lefthook-local.yml
 
 # data
 data/*
@@ -146,6 +148,7 @@ test.ipynb
 conda_env.yml
 hello.py
 document_pipeline_tree.txt
+docs/Prompts/test.txt
 
 # Ruff Cache
 .ruff_cache/*
