@@ -65,6 +65,7 @@ Add `--draft` if you are not ready for review yet:
 gh pr create --draft --title "feat(app): add sitemap timeout" --body "What changed and why."
 ```
 
+- let it `ALL GREEN` on github
 - **PR title** uses the same format as commits (`feat(scope): subject`). Squash-merge uses that title as the commit on `main`, so write a clear title even if a local commit was vague.
 - `gh pr create` uses the current branch as the head and `main` as the base. It does not take a title as a positional argument — use `--title` and `--body`.
 - Keep the PR **draft** until you want review. Copilot only reviews non-draft PRs.
