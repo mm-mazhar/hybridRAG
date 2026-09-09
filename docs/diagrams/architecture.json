@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "hybridRAG runtime",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "visual_preset": "editorial"
+  },
+  "components": [
+    { "id": "browser", "type": "frontend", "label": "Browser", "sublabel": "AI Elements", "pos": [60, 260], "size": [140, 64] },
+    { "id": "next", "type": "frontend", "label": "Next.js", "sublabel": "useChat + /api/chat", "pos": [280, 260], "size": [160, 64] },
+    { "id": "api", "type": "backend", "label": "FastAPI", "sublabel": "ingest + hybrid retrieve", "pos": [530, 260], "size": [150, 64] },
+    { "id": "openrouter", "type": "external", "label": "OpenRouter", "sublabel": "OpenAI-compatible", "pos": [280, 80], "size": [160, 64] },
+    { "id": "lancedb", "type": "database", "label": "LanceDB", "sublabel": "vectors + FTS", "pos": [780, 180], "size": [150, 64] },
+    { "id": "sqlite", "type": "database", "label": "SQLite", "sublabel": "volume /data/cache", "pos": [780, 340], "size": [150, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Docker compose", "wraps": ["next", "api", "lancedb", "sqlite"] }
+  ],
+  "connections": [
+    { "id": "ui-to-next", "from": "browser", "to": "next", "label": "HTTPS UI stream", "variant": "emphasis" },
+    { "id": "next-to-or", "from": "next", "to": "openrouter", "label": "chat completions", "fromSide": "top", "toSide": "bottom" },
+    { "id": "next-to-api", "from": "next", "to": "api", "label": "retrieve / ingest" },
+    { "id": "api-to-lance", "from": "api", "to": "lancedb", "label": "hybrid search" },
+    { "id": "api-to-sqlite", "from": "api", "to": "sqlite", "label": "chat memory" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "UI", "items": ["Next.js owns the Vercel AI SDK stream", "AI Elements render tools, sources, and markdown"] },
+    { "dot": "emerald", "title": "Index", "items": ["FastAPI owns Docling, embeddings, and LanceDB", "SQLite keeps per-document transcripts"] },
+    { "dot": "orange", "title": "Models", "items": ["base_url + model live in YAML", "The same OpenAI-compatible key serves chat and embeddings"] }
+  ]
+}

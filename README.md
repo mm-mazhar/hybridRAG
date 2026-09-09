@@ -1,138 +1,148 @@
-# Hybrid RAG | WEBSITE CRAWLER | A Document Q&A Application with LanceDB
+# hybridRAG
 
-<p align="center">
-  <table>
-    <tr>
-      <td>
-        <a href="LICENSE">
-          <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
-        </a>
-      </td>
-      <td>
-        <a href="https://www.python.org/">
-          <img src="https://img.shields.io/badge/Python-3.9-blue" alt="Python Badge">
-        </a>
-      </td>
-      <td>
-        <a href="https://lancedb.github.io/">
-          <img src="https://img.shields.io/badge/LanceDB-%23228BE6.svg?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAnVJREFUOBGNUtFuwjAQ3p0bK/0w7eD0N7g01A17q1+QW0I0g4oG+QpEQYJ5v/e2+R8J0+J2YV8W7o949rJc5Lw73Lq+i9aF6l+5Xl83n/7/8/8/n/u/r0eI4yQ0Z0f4dM8h0dD9n39P+Lz+U4b02P8/n8N6t9rNbrczN4yQfR7x+/+/1eiqF6Xm488+n0240b6b+f577+9Hn8R/s53Oczk7b153+2+Vqj79/v9+v46gUjI4uL4N8vLycY8n/cW7b0V0Y9K2trY5f0J7iP3y7r/b6d47U47Z88V+z0a+Xp13+g7V6/Wd1k0h6u+YqF66X63X6738v9J/J7Z6/X6j/10+l3V3h6s99v11o16a+r88L8f5+V19m72lTjI5lJ12p6/X6qE/fL+gX6846+k7e/Z8d3Q84tE4hI+h8v+Yf9Xm09U7vT7f2i2u92n7O/oH1p8z/J0iE34jP45k183hF5l3mJ1eP8/6w2a0K+19g8+Jm/qg5q14i76iP7w3qZ4zJ+t6vV6p78gD/pY5XvS+S3nFp+KxH/eXh9vH9b649wJ+vYwAAAAASUVORK5CYII=" alt="LanceDB Badge">
-        </a>
-      </td>
-      <td>
-        <a href="https://openai.com/">
-          <img src="https://img.shields.io/badge/OpenAI-white?style=for-the-badge&logo=openai&logoColor=black" alt="OpenAI Badge">
-        </a>
-      </td>
-      <td>
-        <a href="https://pypi.org/project/docling/">
-          <img src="https://img.shields.io/badge/DocLing-blueviolet" alt="DocLing Badge">
-        </a>
-      </td>
-      <td>
-        <a href="https://streamlit.io/">
-          <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=Streamlit&logoColor=white" alt="Streamlit Badge">
-        </a>
-      </td>
-    </tr>
-  </table>
-</p>
+Local document Q&A with a **split stack**: Next.js streams the chat; FastAPI owns ingest, hybrid chunking, embeddings, and LanceDB. Vectors and chat memory stay on disk. The model is any **OpenAI-compatible** endpoint (OpenAI, OpenRouter, vLLM, LM Studio).
 
-<table>
-    <tr>
-      <td>
-        <a href="">
-          <img src="https://i.imgur.com/cejiHpU.png" alt="Steamlit App Screenshot">
-        </a>
-      </td>
-    </tr>
-  </table>
+UI: [http://localhost:3000](http://localhost:3000) · chat: [http://localhost:3000/chat](http://localhost:3000/chat) · API docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-## Overview
+Interactive Archify drawings also live on the landing page (`#diagrams`). Specs are in [`docs/diagrams/`](docs/diagrams/).
 
-Streamlit-based application that enables you to ask questions about documents and receive answers based on the content of those documents. It uses Hybrib Retrieval-Augmented Generation (RAG) approach to find relevant information within the document and generate accurate, context-aware responses.
+## Split stack
 
-**Key Features:**
+The browser never talks to LanceDB, and FastAPI never emits the Vercel AI SDK UI-message stream.
 
-*   **Document Input Flexibility:** Supports PDFs, URLs, and website sitemap extraction.
-*   **Intelligent Chunking:** Documents are intelligently split into chunks to optimize retrieval accuracy and context.
-*   **Vector Database Powered by LanceDB:** Utilizes LanceDB to store document chunks as embeddings for efficient similarity search.
-*   **OpenAI Integration:** Leverages OpenAI's models for embedding generation and question answering.
-*   **Chat History:** Maintains chat history for each document to provide a more engaging and personalized experience.
-*   **Easy-to-Use Interface:**  Streamlit provides a user-friendly interface for document selection, question input, and result display.
+| Layer | Owns |
+| --- | --- |
+| Browser | AI Elements + `useChat` |
+| Next.js `POST /api/chat` | OpenAI-compatible chat via `createOpenAI({ baseURL }).chat(modelId)`, RAG as a `retrieveDocument` tool |
+| FastAPI | Docling, HybridChunker, embeddings, LanceDB hybrid search, thin LangChain retrievers, SQLite memory, ingest/retrieve JSON |
 
-## Workflow
+```
+Browser  --UI stream-->  Next.js /api/chat  --chat completions-->  LLM API
+                                |
+                                | POST /api/retrieve  (tool call)
+                                v
+                             FastAPI  --hybrid search-->  LanceDB
+```
 
-- Document Input: The user provides a document (PDF, URL, Website).
-- Document Extraction and Chunking: The document is extracted and split into smaller chunks.
-- Embedding Generation: Each chunk is converted into a vector embedding using OpenAI's embedding models.
-- LanceDB Vector Store: The embeddings are stored in LanceDB, along with associated metadata (filename, page numbers, etc.).
-- User Question: The user asks a question related to the document.
-- Embedding Generation: The question is converted into a vector embedding using the same OpenAI model.
-- Similarity Search: LanceDB is used to perform a similarity search, finding the document chunks that are most relevant to the question.
-- Context Retrieval: The text from the relevant document chunks is retrieved.
-- LLM (OpenAI): The user's question and the retrieved context are fed into an OpenAI language model.
-- Answer Generation: The LLM generates an answer based on the provided context.
-- User Output: The answer is displayed to the user.
+That split is the whole point: Next.js can render **Tool**, **Sources**, and streamed markdown natively. FastAPI stays a JSON index service (`POST /api/ingest/*`, `POST /api/retrieve`, `GET /api/documents`, `DELETE /api/documents`, `DELETE /api/documents/{id}`).
 
-## Tools Used
-- Python: The core programming language.
-- Streamlit: For building the user interface.
-- LanceDB: As the vector database to store and search document embeddings.
-- OpenAI API: For generating embeddings and providing question-answering capabilities.
-- DocLing (docling): A library for document conversion and processing.
-- dotenv: For managing environment variables.
-- tiktoken: For tokenization.
-- PyYAML: For configuration file parsing.
+![hybridRAG runtime architecture](docs/diagrams/architecture.png)
 
-## Installation
+The architecture drawing labels the LLM box **OpenRouter**. In this repo the default `base_url` is `https://api.openai.com/v1`; point `config/model_config.yaml` (and `LLM_BASE_URL`) at OpenRouter, OpenAI, or a local server. The key must match the URL (`sk-or-…` for OpenRouter).
 
-1. Clone the repository:
-    ```bash
-    git clone [your_repository_url]
-    cd [directory]
-    ```
-2. Install dependencies and local git hooks (uv):
-    ```bash
-    uv sync
-    uv run lefthook install
-    ```
-    Or run `make setup`. After a fresh clone, always run both commands so lefthook
-    hooks are installed into `.git/hooks`.
-3. Create and activate a virtual environment (if not using `uv run`):
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # On Linux/macOS
-    .venv\Scripts\activate  # On Windows
-    ```
-4. Install dependencies (pip alternative):
-    ```bash
-    pip install -r requirements.txt
-    ```
-5. Configure Environment Variables:
-    - Create a .env file in the root directory of the project.
-    - Add your OpenAI API key:
-    ```
-    OPENAI_API_KEY=your_openai_api_key
-    ```
-    - Adjust configurations in ./configs/docPipeline_configs.yaml according to your needs:
+[Open interactive architecture](web/public/diagrams/architecture.html)
 
-## Running the Application
+## Hybrid RAG mechanism
 
-1. Run the Streamlit app:
-    ```bash
-    streamlit run src/app/app.py
-    ```
-2. Access the application in your web browser at http://localhost:8501.
+“Hybrid” means two things: **structure-aware chunking** at ingest, and **vector + keyword search** at retrieve (LanceDB FTS fused with nearest neighbors via RRF). FastAPI wraps those searches in thin LangChain retrievers so a later agent can reuse them as tools. Generation still happens in Next.js.
 
-## Git workflow
+### 1. Convert
 
-Branch names and commit messages follow conventional commits. See
-[`.agents/rules/git.md`](.agents/rules/git.md). Hooks are enforced by
-`lefthook.yml` (`post-checkout`, `pre-commit`, `commit-msg`, `pre-push`).
-On Windows, the branch-name and commit-msg checks live in `.lefthook/` so Git
-Bash does not break on inline multiline scripts.
+PDF, URL, or sitemap → [Docling](https://github.com/DS4SD/docling) `DocumentConverter` → a `DoclingDocument` (headings, tables, page provenance).
 
-Before opening a PR, run:
+### 2. Hybrid chunk
+
+[`src/processing/chunking.py`](src/processing/chunking.py) runs Docling’s `HybridChunker` with a tiktoken (`cl100k_base`) wrapper:
+
+- split along document structure (sections, lists, tables) instead of naive character windows
+- pack peer chunks up to `max_tokens` (`merge_peers=True`, default 8191 from YAML)
+- keep filename / page numbers on each chunk for citations
+
+### 3. Embed and store
+
+[`src/rag/indexer.py`](src/rag/indexer.py) embeds passage text through the OpenAI-compatible embeddings API (`text-embedding-3-large` by default) and writes one LanceDB table per document: `text`, `vector`, `metadata.{filename, page_numbers, title}`, plus a native full-text index on `text`. On disk: `data/vectordb` (Docker volume `/data/vectordb`).
+
+![hybridRAG ingest path](docs/diagrams/dataflow.png)
+
+[Open interactive ingest flow](web/public/diagrams/dataflow.html)
+
+### 4. Ask: retrieve-then-generate
+
+Chat still streams from Next.js. FastAPI `/api/retrieve` now:
+
+1. Optionally rewrites the question into extra keyword queries (LangChain `ChatOpenAI`, same YAML model).
+2. Runs LanceDB **hybrid search** (vector + full-text, RRF rerank) and an ensemble of the vector and keyword retrievers.
+3. Always prepends the first chunks of the document (title page / header).
+4. Returns passages **and** `hybrid` / `fts` / `multi_query` / `queries` flags to Next.js, which stuffs the passages into the system prompt and still exposes `retrieveDocument` as a tool.
+
+The chat console shows those flags after each question (`HYBRID · FTS · MULTI-QUERY`). FastAPI also writes the same line to `logs/app.log`. Existing tables get an FTS index on first retrieve if ingest ran before this change. Toggle `vector_db.hybrid` / `vector_db.multi_query` in [`config/model_config.yaml`](config/model_config.yaml).
+
+![Ask a document sequence](docs/diagrams/sequence.png)
+
+[Open interactive chat sequence](web/public/diagrams/sequence.html)
+
+## Run locally
+
+Needs **Python 3.13**, **[uv](https://docs.astral.sh/uv/)**, **[pnpm](https://pnpm.io/)**, and an API key for chat + embeddings.
+
+```bash
+uv sync
+uv run lefthook install
+cp .env.example .env
+# set LLM_API_KEY  (OPENAI_API_KEY still works as a FastAPI fallback)
+
+cd web
+pnpm install
+cp .env.example .env.local
+# same LLM_API_KEY
+# FASTAPI_URL=http://127.0.0.1:8000
+```
+
+Edit `config/model_config.yaml` for `llm.base_url`, `llm.model`, and `embeddings.model`. Keep the URL and key family in sync.
+
+**Terminal 1 — FastAPI**
+
+```bash
+uv run uvicorn api.main:app --reload --reload-dir src --reload-dir config --app-dir src --port 8000
+```
+
+Same thing: `make api`.
+
+**Terminal 2 — Next.js**
+
+```bash
+cd web
+pnpm dev
+```
+
+Same thing: `make web`.
+
+Open [http://localhost:3000/chat](http://localhost:3000/chat), index a PDF / URL / sitemap in the press bed, then ask. You should see `retrieveDocument` run before tokens stream. **Lift** drops one plate (LanceDB table + chat memory); **Clear bed** wipes them all. To nuke the folders from the shell: `uv run python scripts/cleanup.py --yes` (restart the API afterward).
+
+## Docker
+
+```bash
+cp .env.example .env   # LLM_API_KEY required
+docker compose up --build
+```
+
+| Service | Port | Role |
+| --- | --- | --- |
+| `web` | 3000 | Next.js (standalone). `FASTAPI_URL=http://api:8000` |
+| `api` | 8000 | FastAPI / uvicorn |
+
+Named volumes `rag-vectordb` and `rag-cache` keep LanceDB and SQLite across restarts. Docling needs the extra system libs baked into the API image (`libgl1`, `libglib2.0-0`, `libgomp1`).
+
+Stop with `docker compose down`. Add `-v` only if you intend to wipe the index and memory.
+
+## Layout
+
+```
+config/                 model + logging YAML
+src/core/               settings, OpenAI-compatible clients
+src/rag/                embed, index, retrieve, LanceDB
+src/processing/         Docling, HybridChunker, sitemap
+src/memory/             SQLite transcripts
+src/api/                FastAPI routes
+web/                    Next.js + AI Elements
+web/public/diagrams/    delivered Archify HTML
+docs/diagrams/          Archify JSON + README PNGs
+data/vectordb/          LanceDB (gitignored)
+data/cache/             SQLite (gitignored)
+logs/app.log            FastAPI retrieve / ingest log (gitignored)
+```
+
+## Tests
 
 ```bash
 uv run ruff check .
@@ -140,26 +150,4 @@ uv run mypy
 uv run pytest
 ```
 
-## Branch protection (GitHub rulesets)
-
-`main` is protected by the ChatbotX-style **`protect_main` repository ruleset**
-(Settings → Rules), not classic branch protection:
-
-- No direct pushes — `main` only advances through pull requests
-- Squash merge only
-- `main` cannot be deleted or force-pushed
-- Required status checks: `Lint`, `Types`, `Tests`
-- Zero required approvals (maintainer can merge their own PR)
-
-A second ruleset, **Copilot review for default branch**, requests Copilot
-review on non-draft PRs. CI also re-runs on every push to `main` after merge.
-
-## Release notes
-
-When a version tag (`v*`) is pushed, `.github/workflows/release.yml` builds and
-publishes to PyPI via Trusted Publishing. The GitHub `pypi` environment must
-exist and be configured for OIDC. Update `CHANGELOG.md` using
-[Keep a Changelog](https://keepachangelog.com) when tagging a release.
-
-
-
+Do not commit `.env` or `web/.env.local`.

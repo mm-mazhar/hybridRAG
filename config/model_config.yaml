@@ -1,0 +1,60 @@
+# OpenAI-compatible. For OpenRouter use:
+#   base_url: https://openrouter.ai/api/v1
+#   model: openai/gpt-4o-mini
+#   embeddings.model: openai/text-embedding-3-large
+llm:
+  base_url: "https://openrouter.ai/api/v1"
+  model: "gpt-4o-mini"
+  temperature: 0.7
+  max_tokens: 8191
+  models:
+    - gpt-4o-mini
+    - gpt-4o
+
+embeddings:
+  base_url: "https://openrouter.ai/api/v1"
+  model: "openai/text-embedding-3-small"
+  batch_size: 64
+
+vector_db:
+  uri: "data/vectordb"
+  mode: "overwrite"
+  limit: 8
+  hybrid: true
+  multi_query: true
+
+memory:
+  path: "data/cache/memory.sqlite"
+
+app:
+  title: "hybridRAG"
+  http_referer: "http://localhost:3000"
+  frontend_origin: "http://localhost:3000"
+  max_upload_bytes: 26214400
+
+ingest:
+  common_tlds:
+    - ".com"
+    - ".org"
+    - ".net"
+    - ".edu"
+    - ".gov"
+    - ".io"
+    - ".ai"
+    - ".co"
+    - ".uk"
+    - ".ca"
+    - ".de"
+    - ".fr"
+    - ".it"
+    - ".es"
+    - ".in"
+    - ".au"
+    - ".nl"
+    - ".be"
+    - ".ch"
+    - ".pt"
+    - ".mx"
+    - ".kr"
+    - ".sg"
+    - ".cn"

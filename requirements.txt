@@ -1,17 +1,16 @@
-# Core dependencies
+# Install with uv (preferred): uv sync
+# This file is a pip-oriented snapshot of pyproject.toml runtime deps.
+
 colorlog>=6.9.0
 docling>=2.22.0
+fastapi[standard]>=0.115.14
 lancedb>=0.19.0
+langchain-core>=1.6.2
+langchain-openai>=1.6.1
 openai>=1.63.0
 pydantic>=2.10.6
+pydantic-settings>=2.7.1
 python-dotenv>=1.0.1
 pyyaml==6.0.3
 requests>=2.32.3
-streamlit>=1.42.0
 tiktoken>=0.9.0
-
-# Development dependencies
-ipykernel>=6.29.5
-pyright>=1.1.393
-pytest>=8.3.4
-pytest-cov>=6.0.0

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "hybridRAG ingest path",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "visual_preset": "editorial",
+    "viewBox": [1080, 500]
+  },
+  "stages": [
+    { "label": "Source" },
+    { "label": "Convert" },
+    { "label": "Chunk" },
+    { "label": "Embed" },
+    { "label": "Store" }
+  ],
+  "nodes": [
+    { "id": "pdf", "type": "frontend", "label": "PDF / URL", "sublabel": "upload", "stage": 0, "row": 1 },
+    { "id": "docling", "type": "backend", "label": "Docling", "sublabel": "converter", "stage": 1, "row": 1 },
+    { "id": "chunker", "type": "backend", "label": "HybridChunker", "sublabel": "tiktoken", "stage": 2, "row": 1 },
+    { "id": "embed", "type": "external", "label": "Embeddings API", "sublabel": "OpenAI-compat", "stage": 3, "row": 1 },
+    { "id": "lance", "type": "database", "label": "LanceDB", "sublabel": "vectors + FTS", "stage": 4, "row": 1 }
+  ],
+  "flows": [
+    { "id": "src-convert", "from": "pdf", "to": "docling", "label": "bytes / URL", "classification": "document", "variant": "emphasis" },
+    { "id": "convert-chunk", "from": "docling", "to": "chunker", "label": "DoclingDocument", "classification": "structure" },
+    { "id": "chunk-embed", "from": "chunker", "to": "embed", "label": "passage text", "classification": "chunks", "variant": "emphasis" },
+    { "id": "embed-store", "from": "embed", "to": "lance", "label": "vectors + FTS index", "classification": "index" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Main path", "items": ["One convert, then hybrid chunks, then embeddings", "LanceDB stores vectors beside an FTS index on chunk text"] },
+    { "dot": "orange", "title": "Local disk", "items": ["No cloud vector store", "The Docker volume keeps the index across restarts"] }
+  ]
+}
