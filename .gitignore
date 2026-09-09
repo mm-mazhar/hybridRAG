@@ -15,7 +15,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -109,6 +108,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.env
+.env.local
+**/.env.local
 
 # Spyder project settings
 .spyderproject
@@ -137,6 +139,19 @@ lefthook-local.yml
 
 # data
 data/*
+!data/.gitkeep
+!data/cache/
+data/cache/*
+!data/cache/.gitkeep
+!data/vectordb/
+data/vectordb/*
+!data/vectordb/.gitkeep
+
+# Next.js
+web/node_modules/
+web/.next/
+web/out/
+web/.turbo/
 
 # Database
 vector_db/*
@@ -149,6 +164,9 @@ conda_env.yml
 hello.py
 document_pipeline_tree.txt
 docs/Prompts/test.txt
+task_plan.md
+findings.md
+progress.md
 
 # Ruff Cache
 .ruff_cache/
@@ -186,3 +204,7 @@ src/api/test_conn.py
 # Logs
 configs/logs/*
 logs/*
+!logs/.gitkeep
+
+# Archify visual-check sidecars
+web/public/diagrams/*.visual-check.*

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Ask a document",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "visual_preset": "editorial",
+    "animation": "trace",
+    "viewBox": [1080, 540]
+  },
+  "participants": [
+    { "id": "user", "type": "external", "label": "User", "sublabel": "browser" },
+    { "id": "web", "type": "frontend", "label": "Next.js", "sublabel": "AI Elements" },
+    { "id": "or", "type": "external", "label": "OpenRouter", "sublabel": "chat model" },
+    { "id": "api", "type": "backend", "label": "FastAPI", "sublabel": "hybrid retrieve" },
+    { "id": "db", "type": "database", "label": "LanceDB", "sublabel": "vector + FTS" }
+  ],
+  "messages": [
+    { "id": "ask", "from": "user", "to": "web", "y": 160, "label": "sendMessage", "variant": "emphasis" },
+    { "id": "retrieve", "from": "web", "to": "api", "y": 196, "label": "POST /api/retrieve", "variant": "emphasis" },
+    { "id": "search", "from": "api", "to": "db", "y": 232, "label": "hybrid vector + FTS" },
+    { "id": "hits", "from": "db", "to": "api", "y": 268, "label": "top-k chunks", "variant": "return" },
+    { "id": "chunks", "from": "api", "to": "web", "y": 304, "label": "JSON + search flags", "variant": "return" },
+    { "id": "generate", "from": "web", "to": "or", "y": 340, "label": "streamText with passages" },
+    { "id": "tokens", "from": "or", "to": "web", "y": 376, "label": "token deltas", "variant": "return" },
+    { "id": "render", "from": "web", "to": "user", "y": 412, "label": "HYBRID line + Sources", "variant": "return" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Retrieve first", "items": ["Next.js always POSTs /api/retrieve before generate", "retrieveDocument remains a visible AI SDK tool"] },
+    { "dot": "cyan", "title": "Hybrid search", "items": ["LanceDB fuses vector and FTS with RRF", "Optional multi-query rewrite uses the same chat model"] }
+  ]
+}
